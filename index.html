@@ -1507,6 +1507,7 @@ init();
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
+  // Firebaseの設定
   const firebaseConfig = {
     apiKey: "AIzaSyBQjnlOfeVvWQJHDxGE9cq-jGsYF3uo0PY",
     authDomain: "mystudy-portal.firebaseapp.com",
@@ -1516,34 +1517,54 @@ init();
     appId: "1:62253255474:web:817a3cbd1ab3ea63e7e52b"
   };
 
-  // Firebaseの準備
+  // Firebaseの初期化
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 1. ポータルサイトから渡されたURLの末尾（?student=〇〇）から生徒IDを読み取る
+  // 教科名の設定（ファイルに合わせて固定）
+  const subjectName = "理科";
+
+  // 1. URLから studentId を取得（例: ?student=12345）
   const urlParams = new URLSearchParams(window.location.search);
   const studentId = urlParams.get('student');
 
-  // 2. 採点ボタンが押された時に実行される「送信機能」
-  window.sendResultToFirebase = async function(subjectName, unitName, correct, total) {
+  // 2. ページ読み込み時に access_logs にアクセスログを送信
+  if (studentId) {
+    try {
+      await addDoc(collection(db, "access_logs"), {
+        studentId: studentId,
+        subject: subjectName,
+        accessedAt: serverTimestamp()
+      });
+      console.log(`【My スタディ】${subjectName}のアクセスログを記録しました。`);
+    } catch (error) {
+      console.error("アクセスログの送信に失敗しました:", error);
+    }
+  } else {
+    console.log("生徒IDがURLに指定されていないため、アクセスログは記録されません。");
+  }
+
+  // 3. 採点処理などから呼び出せるように window.sendResultToFirebase 関数を定義
+  // ※既存の呼び出し元コードとの互換性を保つため、第一引数に passedSubjectName を受ける形にしていますが、
+  // データベースには確実にこのファイルの教科名（理科）として learning_records に送信されるようにしています。
+  window.sendResultToFirebase = async function(passedSubjectName, unitName, correct, total) {
     if (!studentId) {
-      console.log("生徒IDがないため、記録は送信されません。");
+      console.log("生徒IDが指定されていないため、学習記録は送信されません。");
       return;
     }
 
     try {
       await addDoc(collection(db, "learning_records"), {
         studentId: studentId,
-        subject: subjectName,
+        subject: subjectName, // 常に「理科」として記録されます
         unit: unitName,
-        score: `${total}問中 ${correct}問正解`,
-        correctCount: correct,
-        totalCount: total,
-        accessedAt: serverTimestamp()
+        correct: correct,
+        total: total,
+        timestamp: serverTimestamp()
       });
-      console.log("Firebaseへ学習記録を送信しました！");
-    } catch (e) {
-      console.error("記録エラー:", e);
+      console.log(`【My スタディ】${subjectName}（${unitName}）の学習記録を保存しました！`);
+    } catch (error) {
+      console.error("学習記録の送信に失敗しました:", error);
     }
   };
 </script>

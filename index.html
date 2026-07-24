@@ -1411,43 +1411,96 @@ function renderUnit() {
 
 function renderWordBank() {
   const u = getUnit();
-  const usedMap = {};
-  u.qs.forEach((q, qi) => { if (answers[key(u.id, qi)]) usedMap[answers[key(u.id, qi)]] = true; });
-  const words = shuffle([...u.qs.map(q => q[1]), ...u.dummies]);
-  document.getElementById('bankWords').innerHTML = words.map(w => {
-    const used = !!usedMap[w];
-    const sel = selectedWord && selectedWord.dataset.word === w && !used;
+  
+  // 1. 各解答が、このユニットの中で何回使われているかをカウント
+  const answerCounts = {};
+  u.qs.forEach(q => {
+    answerCounts[q[1]] = (answerCounts[q[1]] || 0) + 1;
+  });
+
+  // 2. ユーザーがすでに各空白に何回その単語を入力したかをカウント
+  const usedCounts = {};
+  u.qs.forEach((q, qi) => {
+    const filledWord = answers[key(u.id, qi)];
+    if (filledWord) {
+      usedCounts[filledWord] = (usedCounts[filledWord] || 0) + 1;
+    }
+  });
+
+  // 3. すべての正解（重複含む）とダミーを合わせた語群配列を作成
+  let totalWords = [...u.dummies];
+  u.qs.forEach(q => {
+    totalWords.push(q[1]);
+  });
+  const words = shuffle(totalWords);
+
+  // 4. 各チップのDOMを生成（配列上のインデックス index を持たせて個別に識別する）
+  document.getElementById('bankWords').innerHTML = words.map((w, index) => {
+    // 既に同じ単語が入力された回数
+    const currentUsed = usedCounts[w] || 0;
+    // この単語が正解に含まれる総数（ダミーは1）
+    const maxAllowed = answerCounts[w] || 1;
+
+    // まだ使われていない分の残りストックがあるかチェックし、
+    // 「これまでに描画された同じ単語のチップのうち、何番目か」を判定してusedを決める
+    // 簡易的に、全体で「currentUsed個」消費されている場合、
+    // 語群の中で左側にある同名チップから順に「使用済み」にするための判定を行います。
+    
+    // ※より確実に管理するため、このチップより前にある同名チップが何個使われたかを計算
+    let sameWordCountBefore = 0;
+    for (let i = 0; i < index; i++) {
+      if (words[i] === w) sameWordCountBefore++;
+    }
+    
+    const used = sameWordCountBefore < currentUsed;
+    const sel = selectedWord && selectedWord.dataset.index == index && !used;
+
     let cls = 'word-chip' + (used ? ' used' : '') + (sel ? ' selected' : '');
-    return `<span class="${cls}" data-word="${escW(w)}" onclick="selectChip(this)">${w}</span>`;
+    return `<span class="${cls}" data-word="${escW(w)}" data-index="${index}" onclick="selectChip(this)">${w}</span>`;
   }).join('');
 }
 
-function shuffle(arr) {
-  for (let i = arr.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  return arr;
-}
-function escW(s) { return s.replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
-
 function selectChip(el) {
+  if (el.classList.contains('used')) return;
+  
   document.querySelectorAll('.word-chip').forEach(c => c.classList.remove('selected'));
-  if (selectedWord && selectedWord.dataset.word === el.dataset.word) { selectedWord = null; return; }
+  if (selectedWord && selectedWord.dataset.index === el.dataset.index) { 
+    selectedWord = null; 
+    return; 
+  }
   el.classList.add('selected');
   selectedWord = el;
   highlightNext();
 }
 
-function highlightNext() {
-  document.querySelectorAll('.blank').forEach(b => b.classList.remove('active'));
-  const u = getUnit();
-  for (let qi = 0; qi < u.qs.length; qi++) {
-    if (!answers[key(u.id, qi)]) {
-      const el = document.getElementById(`b_${u.id}_${qi}`);
-      if (el) { el.classList.add('active'); break; }
-    }
+function fillBlank(uid, qi) {
+  const k = key(uid, qi);
+  const el = document.getElementById(`b_${uid}_${qi}`);
+  
+  // すでに埋まっている場合はクリアする
+  if (answers[k]) {
+    delete answers[k];
+    el.textContent = '';
+    el.className = 'blank';
+    renderWordBank();
+    return;
   }
+  
+  // 選択中のチップがない場合は、この空白を選択状態にして終了
+  if (!selectedWord) {
+    document.querySelectorAll('.blank').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    return;
+  }
+  
+  const word = selectedWord.dataset.word;
+  answers[k] = word;
+  el.textContent = word;
+  el.className = 'blank filled';
+  
+  selectedWord = null;
+  renderWordBank();
+  highlightNext();
 }
 
 function fillBlank(uid, qi) {

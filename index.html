@@ -1408,7 +1408,6 @@ function renderUnit() {
   if (!isChecked) { renderWordBank(); document.getElementById('bankArea').style.display = 'block'; }
   else document.getElementById('bankArea').style.display = 'none';
 }
-
 function renderWordBank() {
   const u = getUnit();
   
@@ -1434,19 +1433,10 @@ function renderWordBank() {
   });
   const words = shuffle(totalWords);
 
-  // 4. 各チップのDOMを生成（配列上のインデックス index を持たせて個別に識別する）
+  // 4. 各チップのDOMを生成
   document.getElementById('bankWords').innerHTML = words.map((w, index) => {
-    // 既に同じ単語が入力された回数
     const currentUsed = usedCounts[w] || 0;
-    // この単語が正解に含まれる総数（ダミーは1）
-    const maxAllowed = answerCounts[w] || 1;
-
-    // まだ使われていない分の残りストックがあるかチェックし、
-    // 「これまでに描画された同じ単語のチップのうち、何番目か」を判定してusedを決める
-    // 簡易的に、全体で「currentUsed個」消費されている場合、
-    // 語群の中で左側にある同名チップから順に「使用済み」にするための判定を行います。
     
-    // ※より確実に管理するため、このチップより前にある同名チップが何個使われたかを計算
     let sameWordCountBefore = 0;
     for (let i = 0; i < index; i++) {
       if (words[i] === w) sameWordCountBefore++;
@@ -1459,6 +1449,16 @@ function renderWordBank() {
     return `<span class="${cls}" data-word="${escW(w)}" data-index="${index}" onclick="selectChip(this)">${w}</span>`;
   }).join('');
 }
+
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function escW(s) { return s.replace(/"/g,'&quot;').replace(/'/g,"&#39;"); }
 
 function selectChip(el) {
   if (el.classList.contains('used')) return;
@@ -1473,11 +1473,21 @@ function selectChip(el) {
   highlightNext();
 }
 
+function highlightNext() {
+  document.querySelectorAll('.blank').forEach(b => b.classList.remove('active'));
+  const u = getUnit();
+  for (let qi = 0; qi < u.qs.length; qi++) {
+    if (!answers[key(u.id, qi)]) {
+      const el = document.getElementById(`b_${u.id}_${qi}`);
+      if (el) { el.classList.add('active'); break; }
+    }
+  }
+}
+
 function fillBlank(uid, qi) {
   const k = key(uid, qi);
   const el = document.getElementById(`b_${uid}_${qi}`);
   
-  // すでに埋まっている場合はクリアする
   if (answers[k]) {
     delete answers[k];
     el.textContent = '';
@@ -1486,7 +1496,6 @@ function fillBlank(uid, qi) {
     return;
   }
   
-  // 選択中のチップがない場合は、この空白を選択状態にして終了
   if (!selectedWord) {
     document.querySelectorAll('.blank').forEach(b => b.classList.remove('active'));
     el.classList.add('active');

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>志学ゼミナール | 中学理科 テーマ別演習</title>
+  <style>
+    :root {
+      --primary-color: #7c4dff;
+      --primary-light: #f0ebff;
+      --primary-dark: #651fff;
+      --bg-color: #f5f5f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --text-sub: #666666;
+      --border-color: #e0e0e0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding-bottom: 40px;
+    }
+
+    /* ヘッダー */
+    header {
+      background: linear-gradient(135deg, #7c4dff, #b388ff);
+      color: white;
+      text-align: center;
+      padding: 20px 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    header .sub-title {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    /* メインナビゲーション（ポータル / テーマ別） */
+    .top-nav {
+      display: flex;
+      justify-content: center;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .top-nav a {
+      padding: 12px 24px;
+      text-decoration: none;
+      color: var(--text-sub);
+      font-weight: bold;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .top-nav a.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    /* コンテナ */
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    /* メインサブタブ（実験器具の使い方 / 記述問題） */
+    .sub-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .sub-tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--primary-color);
+      background-color: #fff;
+      color: var(--primary-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .sub-tab-btn.active {
+      background-color: var(--primary-color);
+      color: #fff;
+    }
+
+    /* タブコンテンツエリア */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* 学年フィルター（記述問題用） */
+    .grade-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .grade-btn {
+      padding: 6px 16px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--text-sub);
+      transition: all 0.2s;
+    }
+
+    .grade-btn.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    /* 画像ギャラリー（4並び・統一スタイル） */
+    .image-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .image-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fafafa;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .image-wrapper {
+      width: 100%;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .image-wrapper img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+
+    .image-card span {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--text-color);
+      text-align: center;
+    }
+
+    /* 問題カード */
+    .q-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .q-num {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .q-text {
+      font-size: 0.98rem;
+      font-weight: 500;
+      flex-grow: 1;
+    }
+
+    .unit-tag {
+      font-size: 0.8rem;
+      color: var(--primary-color);
+      font-weight: bold;
+      margin-right: 6px;
+    }
+
+    /* 解答アコーディオンボタン */
+    .ans-toggle-btn {
+      margin-top: 12px;
+      background: none;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .ans-toggle-btn:hover {
+      background: var(--primary-light);
+    }
+
+    /* 模範解答エリア */
+    .ans-box {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 15px;
+      background: #f9f8ff;
+      border-radius: 6px;
+      border: 1px dashed var(--primary-color);
+      font-size: 0.95rem;
+      color: #2c2c2c;
+    }
+
+    .ans-box.show {
+      display: block;
+    }
+
+    /* スマホ対応 */
+    @media (max-width: 600px) {
+      .image-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+      }
+      .image-wrapper {
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <header>
+    <div class="sub-title">志学ゼミナール | テーマ別演習</div>
+    <h1>中学理科 テーマ別演習</h1>
+  </header>
+
+  <!-- トップナビゲーション（index.htmlとの切り替え） -->
+  <nav class="top-nav">
+    <a href="index.html">一問一答ポータル</a>
+    <a href="theme.html" class="active">テーマ別演習</a>
+  </nav>
+
+  <div class="container">
+    <!-- メインサブタブ（実験器具の使い方 / 記述問題） -->
+    <div class="sub-tabs">
+      <button class="sub-tab-btn active" onclick="switchSubTab('lab')">🧪 実験器具の使い方</button>
+      <button class="sub-tab-btn" onclick="switchSubTab('desc')">📝 記述問題</button>
+    </div>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- サブタブ1: 実験器具の使い方 -->
+    <!-- ---------------------------------------------------- -->
+    <div id="tab-lab" class="tab-content active">
+      <!-- 上部WebP画像4個（1行に横並び・レスポンシブ対応） -->
+ <!-- 上部WebP画像4個（正しく修正した並び） -->
+      <div class="image-gallery">
+        <div class="image-card">
+          <div class="image-wrapper">
+            <img src="img/jikken1.webp" alt="顕微鏡">
+          </div>
+          <span>顕微鏡</span>
+        </div>
+        
+        <div class="image-card">
+          <div class="image-wrapper">
+            <img src="img/jikken2.webp" alt="メスシリンダー">
+          </div>
+          <span>メスシリンダー</span>
+        </div>
+        
+        <div class="image-card">
+          <div class="image-wrapper">
+            <img src="img/jikken3.webp" alt="ガスバーナー">
+          </div>
+          <span>ガスバーナー</span>
+        </div>
+        
+        <div class="image-card">
+          <div class="image-wrapper">
+            <img src="img/jikken4.webp" alt="上皿天秤">
+          </div>
+          <span>上皿天秤</span>
+        </div>
+      </div>
+
+      <!-- 実験器具の問題20問エリア -->
+      <div id="lab-questions-container"></div>
+    </div>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- サブタブ2: 記述問題 -->
+    <!-- ---------------------------------------------------- -->
+    <div id="tab-desc" class="tab-content">
+      <!-- 学年フィルター -->
+      <div class="grade-filter">
+        <button class="grade-btn active" onclick="filterGrade('all', event)">すべて</button>
+        <button class="grade-btn" onclick="filterGrade('ch1', event)">中1</button>
+        <button class="grade-btn" onclick="filterGrade('ch2', event)">中2</button>
+        <button class="grade-btn" onclick="filterGrade('ch3', event)">中3</button>
+      </div>
+
+      <!-- 記述問題エリア -->
+      <div id="desc-questions-container"></div>
+    </div>
+  </div>
+
+  <script>
+    // 1. 実験器具データ（全20問）
+    const labData = [
+      { id: 1, q: "顕微鏡で観察するとき、対物レンズをプレパラートから遠ざけながらピントを合わせるのはなぜか。", a: "対物レンズをプレパラートに近づけながらピントを合わせると、プレパラートをこわすことがあるから。" },
+      { id: 2, q: "顕微鏡の倍率を高くしたとき、視野の明るさと観察できる範囲はどのように変化するか。", a: "視野は暗くなり、観察できる範囲は狭くなる。" },
+      { id: 3, q: "ステージ上下式顕微鏡で、ピントを合わせるときに回すねじの名称は何か。", a: "調節ねじ" },
+      { id: 4, q: "顕微鏡を取り付ける際、接眼レンズと対物レンズのどちらを先に取り付けるか。", a: "接眼レンズ（鏡筒内にホコリが入るのを防ぐため）" },
+      { id: 5, q: "顕微鏡で視野全体の明るさを調節するときに使う部品名を2つ答えなさい。", a: "しぼり、反射鏡" },
+      { id: 6, q: "メスシリンダーで液体の体積を読み取るとき、目線は液面のどの位置に合わせるか。", a: "へこんだ部分の平らな位置（水平な位置）" },
+      { id: 7, q: "メスシリンダーの最小目盛りのどこまでを目分量で読み取るか。", a: "1/10の位まで" },
+      { id: 8, q: "メスシリンダーはどのような場所に置いて使用しなければならないか。", a: "水平な台の上" },
+      { id: 9, q: "ガスバーナーに火をつける際、元栓とコックを開けた後に最初に開けるねじはどれか。", a: "ガス調整ねじ" },
+      { id: 10, q: "ガスバーナーの空気調整ねじは、上下のねじのどちら側か。", a: "上側のねじ（下側はガス調整ねじ）" },
+      { id: 11, q: "空気調整ねじを開けて充分に空気を送ると、炎の色は何色になるか。", a: "青色" },
+      { id: 12, q: "ガスバーナーの火を消すとき、締め閉じるねじの順番を答えなさい。", a: "空気調整ねじ → ガス調整ねじの順" },
+      { id: 13, q: "上皿天秤を使用する前、針が左右に均等に振れるように調節するねじは何か。", a: "調節ねじ" },
+      { id: 14, q: "上皿天秤で薬品の質量をはかるとき、左皿と右皿にはそれぞれ何をのせるか。", a: "左皿に薬品（薬紙）、右皿に分銅" },
+      { id: 15, q: "分銅を扱うとき、指で直接触れずに何を使って扱うか。", a: "ピンセット" },
+      { id: 16, q: "分銅を皿にのせていく際、どの大きさの分銅から順にのせていくか。", a: "重い（大きい）分銅から順にのせる" },
+      { id: 17, q: "液体を熱するとき、急激な沸騰（突沸）を防ぐためにあらかじめ入れておくものは何か。", a: "沸騰石" },
+      { id: 18, q: "発生した気体のにおいを確かめるときはどのようにしてかぐか。", a: "試験管の口を手であおいでかぐ。" },
+      { id: 19, q: "葉の緑色を脱色するために、温かい何にひたすか。", a: "エタノール" },
+      { id: 20, q: "加熱中の試験管の口を人に向けたり、のぞき込んだりしてはいけない理由を答えなさい。", a: "急激に液体が飛び出す（突沸する）おそれがあるため。" }
+    ];
+
+    // 2. 記述問題データ（PDF記載の全87問）
+    const descData = [
+      // 中1 生物
+      { grade: 'ch1', unit: '生物', q: "顕微鏡で観察するとき、対物レンズをプレパラートから遠ざけながらピントを合わせるのはなぜか。", a: "対物レンズをプレパラートに近づけながらピントを合わせると、プレパラートをこわすことがあるから。" },
+      { grade: 'ch1', unit: '生物', q: "葉にできたデンプンをヨウ素液で調べる前に、葉をあたたかいエタノールにひたすのはなぜか。", a: "葉の緑色を脱色するため。" },
+      { grade: 'ch1', unit: '生物', q: "対照実験とは、どのようにして行う実験か。「条件」という語句を用いて書きなさい。", a: "調べようとすることがら以外の条件を同じにして行う実験。" },
+      { grade: 'ch1', unit: '生物', q: "息をふきこみ、新鮮なホウセンカの葉を入れてすぐにふくろの中の二酸化炭素の割合を測定した。次に、このふくろを光が十分に当たる場所に置いた。3時間後、ふくろの中の二酸化炭素の割合を測定するとその割合は減少していた。このような変化が起こった理由を、呼吸と光合成に出入りする二酸化炭素の量の違いにふれて書きなさい。", a: "光合成でとり入れる二酸化炭素の量のほうが、呼吸で出す二酸化炭素の量より多く、全体では二酸化炭素の量が減ったから。" },
+      { grade: 'ch1', unit: '生物', q: "植物の蒸散量を調べる実験で、植物の枝をさした試験管の水面に少量の油を浮かべるのはなぜか。", a: "水面からの水の蒸発をふせぐため。" },
+      { grade: 'ch1', unit: '生物', q: "アジサイの枝を用いて、葉の表側と裏側の蒸散量を調べたところ、葉の裏側からの蒸散量のほうがおおかった。その理由を書きなさい。", a: "気孔の数が、葉の表側よりも裏側のほうが多いから。" },
+      { grade: 'ch1', unit: '生物', q: "ホウセンカを真上から見ると、葉は互いに重ならないようについている。このことは、どのような点で都合がよいか。", a: "多くの葉に日光が当たる。" },
+      { grade: 'ch1', unit: '生物', q: "根の先端に根毛があることは、どのような点で役に立っているか。「表面積」という語句を用いて書きなさい。", a: "根の表面積が大きくなり、効率よく水や水にとけた養分を吸収できる。" },
+      { grade: 'ch1', unit: '生物', q: "コケ植物の仮根は、おもにどのようなはたらきをしているか。", a: "からだを土や岩に固定するはたらき。" },
+
+      // 中1 化学
+      { grade: 'ch1', unit: '化学', q: "試験管に集めた気体のにおいはどのようにかぐか。", a: "試験管の口を手であおいでかぐ。" },
+      { grade: 'ch1', unit: '化学', q: "液体を熱するとき、液体に沸騰石を入れておくのはなぜか。", a: "急に沸騰することをふせぐため(突沸することをふせぐため)。" },
+      { grade: 'ch1', unit: '化学', q: "アンモニアは、上方置換法で集めるのはなぜか。「水」「密度」という語句を用いて書きなさい。", a: "アンモニアは、水にとけやすく、空気よりも密度が小さいから。" },
+      { grade: 'ch1', unit: '化学', q: "水上置換法で集めるとき、はじめに出てくる気体は集めずに、しばらくしてから集める。その理由を簡単に答えなさい。", a: "はじめに出てきた気体には、実験装置の中の空気が混ざっているから。" },
+      { grade: 'ch1', unit: '化学', q: "80℃の塩化ナトリウムの飽和水溶液を20℃に冷やしても、ほとんど結晶が出てこない。その理由を「溶解度」という語句を用いて書きなさい。", a: "塩化ナトリウムは、温度が変わっても溶解度がほとんど変わらないため。" },
+
+      // 中1 物理
+      { grade: 'ch1', unit: '物理', q: "打ち上げ花火では、花火が開くときの光が見えたあとにその音が聞こえるのはなぜか。", a: "音の伝わる速さが光の速さに比べておそいから。" },
+      { grade: 'ch1', unit: '物理', q: "水面から深くなればなるほど水圧はどうなるか。", a: "大きくなる" },
+
+      // 中1 地学
+      { grade: 'ch1', unit: '地学', q: "深成岩と火山岩それぞれについて、マグマがどのように冷えてできるか。マグマの冷える場所と冷え方についてふれて書きなさい。", a: "(深成岩) マグマが地下の深いところでゆっくりと冷えて固まってできる。(火山岩) マグマが地表や地表付近で急に冷えて固まってできる。" },
+      { grade: 'ch1', unit: '地学', q: "震度とマグニチュードの違いを簡単に書きなさい。", a: "震度は観測地点でのゆれの大きさを表し、マグニチュードは地震の規模を表す。" },
+      { grade: 'ch1', unit: '地学', q: "泥岩、砂岩、れき岩をつくっている粒が丸みを帯びているのはなぜか。", a: "水の流れによって運ばれる間に、角がけずられたため。" },
+      { grade: 'ch1', unit: '地学', q: "示準化石となる生物にはどのような特徴があるか。「範囲」「期間」という語句を用いて書きなさい。", a: "生活していた範囲が広く、生存していた期間が短い。" },
+
+      // 中2 生物
+      { grade: 'ch2', unit: '生物', q: "小腸の内側に柔毛が無数にあることは、どのような点で役に立っているか。「表面積」という語句を用いて書きなさい。", a: "小腸の表面積が大きくなり、栄養分を効率よく吸収できる点。" },
+      { grade: 'ch2', unit: '生物', q: "赤血球に含まれるヘモグロビンが肺で酸素と結合し、からだの組織で酸素をはなすのは、ヘモグロビンにどのような性質があるためか。", a: "酸素が多いところでは、酸素と結合し酸素の少ないところでは、酸素をはなす性質。" },
+      { grade: 'ch2', unit: '生物', q: "静脈のところどころにある弁にはどのようなはたらきがあるか。", a: "血液の逆流を防ぐはたらき。" },
+      { grade: 'ch2', unit: '生物', q: "肺に多数の肺胞があることは、どのような点で役に立っているか。「面積」という語句を用いて書きなさい。", a: "空気とふれる面積が大きくなり、酸素と二酸化炭素の交換が効率よくできる点。" },
+      { grade: 'ch2', unit: '生物', q: "細胞呼吸でできたアンモニアはどのような過程を経て体外へ排出されるか。", a: "アンモニアは、肝臓で尿素に変えられ、じん臓で血液中からこし出されて尿となり、体外へ排出される。" },
+      { grade: 'ch2', unit: '生物', q: "目の虹彩には、どのようなはたらきがあるか。", a: "目に入る光の量を調節するはたらき。" },
+      { grade: 'ch2', unit: '生物', q: "反射では、通常の反応よりも素早く反応することができる。その理由を「脳」「せきずい」という語句を用いて書きなさい。", a: "刺激が脳に伝わる前に、せきずいから命令が出されるから。" },
+      { grade: 'ch2', unit: '生物', q: "シマウマの目は、ライオンとは異なり、顔の側面についている。これは、シマウマが生活するうえで、どのような利点があるか。", a: "広い範囲を見渡すことができ、身を守るのに役立っている。" },
+      { grade: 'ch2', unit: '生物', q: "カエルの子と成体は、それぞれどのように呼吸をするか。", a: "子のときはえらで呼吸をするが、成体のときは肺と皮膚で呼吸をする。" },
+      { grade: 'ch2', unit: '生物', q: "ホニュウ類や鳥類は恒温動物である。恒温動物には、どのような特徴があるか。「体温」という語句を用いて書きなさい。", a: "外界の温度が変化しても体温を保つことができる。" },
+      { grade: 'ch2', unit: '生物', q: "昆虫類などの節足動物は、からだの表面やあしにどのような特徴があるか。", a: "からだが外骨格でおおわれ、あしに節がある。" },
+
+      // 中2 化学
+      { grade: 'ch2', unit: '化学', q: "単体とはどんな物質か、簡潔に書きなさい。", a: "1種類の原子からできている物質。" },
+      { grade: 'ch2', unit: '化学', q: "試験管内で炭酸水素ナトリウムを加熱するとき、試験管の口を底よりも下げて加熱するのはなぜか。", a: "できた水(液体)が加熱部分に流れると、試験管が割れることがあるから。" },
+      { grade: 'ch2', unit: '化学', q: "水の電気分解では、水酸化ナトリウムをとかした水を用いるのはなぜか。", a: "水に電流を流しやすくするため。" },
+      { grade: 'ch2', unit: '化学', q: "鉄粉と硫黄の粉末の混合物を加熱するとき、混合物が赤くなりはじめたら加熱をやめる。その理由を書きなさい。", a: "鉄と硫黄の化合では熱が発生し、その熱によって反応が進むから。" },
+      { grade: 'ch2', unit: '化学', q: "化学変化の前後で、物質全体の質量が変わらないのはなぜか。「原子」という語句を用いて書きなさい。", a: "化学変化の前後で物質全体の原子の種類と数が変わらないから。" },
+
+      // 中2 物理
+      { grade: 'ch2', unit: '物理', q: "電磁誘導という現象を簡潔に説明しなさい。", a: "コイルのまわりの磁界が変化すると、コイルに電圧が生じ電流が流れる現象" },
+
+      // 中2 地学
+      { grade: 'ch2', unit: '地学', q: "寒冷前線が通過するとき、風向と気温はどうなるか。", a: "風向が北寄りに変わり、気温が急に下がる。" },
+      { grade: 'ch2', unit: '地学', q: "寒冷前線付近では、にわか雨があることが多いのはなぜか。その理由を「暖気」「寒気」という語句を用いて、雲ができる過程にふれて書きなさい。", a: "寒冷前線付近では、寒気が暖気の下にもぐりこんで急な上昇気流を生じ、積乱雲が発達するから。" },
+      { grade: 'ch2', unit: '地学', q: "晴れた日の昼、海岸付近では、海から陸に向かう風がふくのはなぜか。「気流」「気圧」という語句を用いて書きなさい。", a: "陸上で上昇気流が生じ、陸上の気圧が海上よりも低くなるため。" },
+      { grade: 'ch2', unit: '地学', q: "春と秋、日本付近の天気が数日おきに変化するのはなぜか。", a: "偏西風によって、移動性高気圧と低気圧が交互に日本付近を通過するから。" },
+      { grade: 'ch2', unit: '地学', q: "冬の季節風は、ユーラシア大陸では乾燥しているが、日本海側に大雪を降らせる。その理由を「水蒸気」という語句を用いて書きなさい。", a: "季節風で移動してきた空気が日本海上を通過する間に、多量の水蒸気を含むため。" },
+
+      // 中3 生物
+      { grade: 'ch3', unit: '生物', q: "タマネギの根の先端を顕微鏡で観察する前に、切りとった根をうすい塩酸につける。この処理を行うのはなぜか。", a: "ひとつひとつの細胞をはなれやすくするため。" },
+      { grade: 'ch3', unit: '生物', q: "タマネギの根は、細胞のどのような変化によって成長するか。", a: "先端付近で細胞の数がふえ、ふえた細胞の大きさが大きくなって成長する。" },
+      { grade: 'ch3', unit: '生物', q: "動物の胚は、いつからいつまでの間をいうか。", a: "受精卵が細胞分裂をはじめてから自分で食物をとり始めるまでの間。" },
+      { grade: 'ch3', unit: '生物', q: "親のからだの一部から子ができる無性生殖では、子には親と同じ形質が現れる。その理由を「染色体」「遺伝子」という語句を用いて書きなさい。", a: "子は親から同じ染色体を受けつぐので、同じ遺伝子をもつため。" },
+      { grade: 'ch3', unit: '生物', q: "生態系において、草食動物の数量が急激にふえると、肉食動物と植物の数量は一時的にどうなるか。", a: "肉食動物の数量はふえ、植物の数量は減る。" },
+      { grade: 'ch3', unit: '生物', q: "森で採集した土を2つに分け、そのままの土をペットボトルAに入れ、十分に焼いた土をペットボトルBに入れた。次に、それぞれのペットボトルにデンプンのりを加えて放置した。3日後、それぞれから上澄み液をとり、ヨウ素液を加えたところ、ペットボトルAでは変化が見られなかった。(A)ペットボトルBに入れた土を十分に焼いたのはなぜか。(B)ペットボトルAの上澄み液では、ヨウ素液の変化が見られなかったのはなぜか。", a: "(A) 土の中の菌類や細菌類などを死滅させるため。(B) 菌類や細菌類などがデンプンを分解したから。" },
+
+      // 中3 化学
+      { grade: 'ch3', unit: '化学', q: "うすい塩酸を電気分解装置に入れて電流を流すと、発生する水素と塩素の体積は同じはずなのに、集まる体積は塩素のほうが少ない。これは塩素にどのような性質があるためか。", a: "塩素が水にとけやすいため。" },
+      { grade: 'ch3', unit: '化学', q: "ビーカーに水溶液を入れ、2枚の板を入れて電池をつくった。このとき、水溶液と板をどのようなものを用いるとよいか。", a: "電解質の水溶液に2種類の金属板を入れる。" },
+      { grade: 'ch3', unit: '化学', q: "BTB溶液を加えた水酸化ナトリウム水溶液に塩酸を加えていくと、水溶液の色が緑色になった。水溶液の色が緑色になった理由を、水溶液中のイオンに着目して答えなさい。", a: "水酸化物イオンと水素イオンが互いの性質を打ち消し合い、水溶液が中性になるため。" },
+
+      // 中3 物理
+      { grade: 'ch3', unit: '物理', q: "台車が斜面をのぼる運動をするとき、しだいに速さがおそくなる。その理由を書きなさい。", a: "台車の運動の向きと逆向きに力がはたらくから。" },
+      { grade: 'ch3', unit: '物理', q: "LED電球が白熱電球より優れている点を、エネルギーの移り変わりについて簡単に答えなさい。", a: "白熱電球よりも、エネルギーの変換効率が高い点。" },
+
+      // 中3 地学
+      { grade: 'ch3', unit: '地学', q: "透明半球上に太陽の位置を記録するとき、サインペンの先の影がどのようになるように印をつけるか。", a: "サインペンの先の影が円の中心にくるように、透明半球上に印をつける。" },
+      { grade: 'ch3', unit: '地学', q: "太陽が東の地平線からのぼり、南の空を通って、西の地平線に沈むのはなぜか。「東」「西」「南」「北」から2つの語句を用いて書きなさい。", a: "地球が西から東に自転しているから。" },
+      { grade: 'ch3', unit: '地学', q: "北極星は1晩中観測しても、その位置のまま動かない。その理由を「地軸」という語句を用いて書きなさい。", a: "北極星は、地軸を延長した付近にあるから。" },
+      { grade: 'ch3', unit: '地学', q: "太陽の南中高度が季節によって変化するのはなぜか。その理由を「地軸」「公転」という語句を用いて、書きなさい。", a: "地球が公転面に立てた垂線に対して地軸を傾けたまま、太陽のまわりを公転しているから。" },
+      { grade: 'ch3', unit: '地学', q: "太陽の表面を天体望遠鏡で観測するとき、ファインダーをのぞいてはいけない。理由を書きなさい。", a: "太陽の光によって目を傷めるおそれがあるから。" },
+      { grade: 'ch3', unit: '地学', q: "太陽の表面に見られる黒点が黒く見えるのはなぜか。", a: "まわりよりも温度が低いから。" },
+      { grade: 'ch3', unit: '地学', q: "太陽の表面に見られる黒点を数日おきに観測すると移動しているのはなぜか。", a: "太陽が自転をしているから。" },
+      { grade: 'ch3', unit: '地学', q: "太陽が球形であるとわかるのは、中央部で円形であった黒点がどのように変形して見えるためか。", a: "中央部で円形であった黒点が周辺部では細長く変形して見えるから。" },
+      { grade: 'ch3', unit: '地学', q: "月食、日食はどのような現象か。それぞれが起こるときの太陽、地球、月の位置にふれて書きなさい。", a: "(月食) 太陽・地球・月の順に一直線上に並び、月が地球の影に入る現象。(日食) 太陽・月・地球の順に一直線上に並び、太陽が月にかくれて見えなくなる現象。" },
+      { grade: 'ch3', unit: '地学', q: "金星を真夜中に観測できないのはなぜか。その理由を「公転」という語句を用いて書きなさい。", a: "金星は、地球よりも内側を公転しているから。" }
+    ];
+
+    // サブタブ切り替え
+    function switchSubTab(tabName) {
+      document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      if (tabName === 'lab') {
+        document.querySelectorAll('.sub-tab-btn')[0].classList.add('active');
+        document.getElementById('tab-lab').classList.add('active');
+      } else {
+        document.querySelectorAll('.sub-tab-btn')[1].classList.add('active');
+        document.getElementById('tab-desc').classList.add('active');
+      }
+    }
+
+    // 問題カードのHTML作成
+    function createQuestionCard(item, index) {
+      return `
+        <div class="q-card">
+          <div class="q-header">
+            <span class="q-num">Q.${index + 1}</span>
+            <div class="q-text">
+              ${item.unit ? `<span class="unit-tag">[${item.unit}]</span>` : ''}
+              ${item.q}
+            </div>
+          </div>
+          <button class="ans-toggle-btn" onclick="toggleAnswer(this)">解答を表示</button>
+          <div class="ans-box">
+            <strong>【模範解答】</strong><br>
+            ${item.a}
+          </div>
+        </div>
+      `;
+    }
+
+    // 解答表示トグル
+    function toggleAnswer(btn) {
+      const ansBox = btn.nextElementSibling;
+      if (ansBox.classList.contains('show')) {
+        ansBox.classList.remove('show');
+        btn.textContent = '解答を表示';
+      } else {
+        ansBox.classList.add('show');
+        btn.textContent = '解答を隠す';
+      }
+    }
+
+    // 記述問題の学年フィルター
+    function filterGrade(grade, event) {
+      if (event) {
+        document.querySelectorAll('.grade-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+      }
+
+      const container = document.getElementById('desc-questions-container');
+      const filtered = grade === 'all' ? descData : descData.filter(d => d.grade === grade);
+      
+      container.innerHTML = filtered.map((item, idx) => createQuestionCard(item, idx)).join('');
+    }
+
+    // 初期化表示
+    window.onload = function() {
+      // 実験器具問題描画（20問）
+      document.getElementById('lab-questions-container').innerHTML = 
+        labData.map((item, idx) => createQuestionCard(item, idx)).join('');
+
+      // 記述問題描画（全問題初期化）
+      filterGrade('all', null);
+    };
+  </script>
+</body>
+</html>

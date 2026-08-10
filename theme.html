@@ -161,6 +161,22 @@
       border-radius: 8px;
       padding: 10px;
       box-sizing: border-box;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .image-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(124, 77, 255, 0.15);
+    }
+
+    .image-card::after {
+      content: '🔍 タップで拡大';
+      font-size: 0.72rem;
+      color: var(--primary-color);
+      margin-top: 4px;
+      font-weight: bold;
     }
 
     .image-wrapper {
@@ -265,6 +281,134 @@
       display: block;
     }
 
+    /* モーダル（拡大・ポイント表示）スタイル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.25s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 15px;
+      right: 18px;
+      background: #f0f0f0;
+      border: none;
+      font-size: 1.4rem;
+      font-weight: bold;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .modal-img-container {
+      width: 100%;
+      max-height: 260px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fafafa;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-img-container img {
+      max-width: 100%;
+      max-height: 240px;
+      object-fit: contain;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 6px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .modal-points {
+      width: 100%;
+      font-size: 0.92rem;
+      color: var(--text-color);
+    }
+
+    .modal-points h4 {
+      font-size: 1rem;
+      color: #333;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-points ul {
+      padding-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    .modal-points li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .modal-points .highlight {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+
     /* スマホ対応 */
     @media (max-width: 600px) {
       .image-gallery {
@@ -299,35 +443,31 @@
       <button class="sub-tab-btn" onclick="switchSubTab('desc')">📝 記述問題</button>
     </div>
 
-    <!-- ---------------------------------------------------- -->
     <!-- サブタブ1: 実験器具の使い方 -->
-    <!-- ---------------------------------------------------- -->
     <div id="tab-lab" class="tab-content active">
-      <!-- 上部WebP画像4個（1行に横並び・レスポンシブ対応） -->
- <!-- 上部WebP画像4個（正しく修正した並び） -->
       <div class="image-gallery">
-        <div class="image-card">
+        <div class="image-card" onclick="openModal('microscope')">
           <div class="image-wrapper">
             <img src="img/jikken1.webp" alt="顕微鏡">
           </div>
           <span>顕微鏡</span>
         </div>
         
-        <div class="image-card">
+        <div class="image-card" onclick="openModal('cylinder')">
           <div class="image-wrapper">
             <img src="img/jikken2.webp" alt="メスシリンダー">
           </div>
           <span>メスシリンダー</span>
         </div>
         
-        <div class="image-card">
+        <div class="image-card" onclick="openModal('burner')">
           <div class="image-wrapper">
             <img src="img/jikken3.webp" alt="ガスバーナー">
           </div>
           <span>ガスバーナー</span>
         </div>
         
-        <div class="image-card">
+        <div class="image-card" onclick="openModal('balance')">
           <div class="image-wrapper">
             <img src="img/jikken4.webp" alt="上皿天秤">
           </div>
@@ -339,11 +479,8 @@
       <div id="lab-questions-container"></div>
     </div>
 
-    <!-- ---------------------------------------------------- -->
     <!-- サブタブ2: 記述問題 -->
-    <!-- ---------------------------------------------------- -->
     <div id="tab-desc" class="tab-content">
-      <!-- 学年フィルター -->
       <div class="grade-filter">
         <button class="grade-btn active" onclick="filterGrade('all', event)">すべて</button>
         <button class="grade-btn" onclick="filterGrade('ch1', event)">中1</button>
@@ -351,8 +488,21 @@
         <button class="grade-btn" onclick="filterGrade('ch3', event)">中3</button>
       </div>
 
-      <!-- 記述問題エリア -->
       <div id="desc-questions-container"></div>
+    </div>
+  </div>
+
+  <!-- モーダル（ポップアップ表示） -->
+  <div id="imageModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close-btn" onclick="closeModalDirect()">&times;</button>
+      <div class="modal-body">
+        <div class="modal-img-container">
+          <img id="modalImg" src="" alt="拡大画像">
+        </div>
+        <div class="modal-title" id="modalTitle">実験器具の名称</div>
+        <div class="modal-points" id="modalPoints"></div>
+      </div>
     </div>
   </div>
 
@@ -381,9 +531,8 @@
       { id: 20, q: "加熱中の試験管の口を人に向けたり、のぞき込んだりしてはいけない理由を答えなさい。", a: "急激に液体が飛び出す（突沸する）おそれがあるため。" }
     ];
 
-    // 2. 記述問題データ（PDF記載の全87問）
+    // 2. 記述問題データ（全87問）
     const descData = [
-      // 中1 生物
       { grade: 'ch1', unit: '生物', q: "顕微鏡で観察するとき、対物レンズをプレパラートから遠ざけながらピントを合わせるのはなぜか。", a: "対物レンズをプレパラートに近づけながらピントを合わせると、プレパラートをこわすことがあるから。" },
       { grade: 'ch1', unit: '生物', q: "葉にできたデンプンをヨウ素液で調べる前に、葉をあたたかいエタノールにひたすのはなぜか。", a: "葉の緑色を脱色するため。" },
       { grade: 'ch1', unit: '生物', q: "対照実験とは、どのようにして行う実験か。「条件」という語句を用いて書きなさい。", a: "調べようとすることがら以外の条件を同じにして行う実験。" },
@@ -393,25 +542,17 @@
       { grade: 'ch1', unit: '生物', q: "ホウセンカを真上から見ると、葉は互いに重ならないようについている。このことは、どのような点で都合がよいか。", a: "多くの葉に日光が当たる。" },
       { grade: 'ch1', unit: '生物', q: "根の先端に根毛があることは、どのような点で役に立っているか。「表面積」という語句を用いて書きなさい。", a: "根の表面積が大きくなり、効率よく水や水にとけた養分を吸収できる。" },
       { grade: 'ch1', unit: '生物', q: "コケ植物の仮根は、おもにどのようなはたらきをしているか。", a: "からだを土や岩に固定するはたらき。" },
-
-      // 中1 化学
       { grade: 'ch1', unit: '化学', q: "試験管に集めた気体のにおいはどのようにかぐか。", a: "試験管の口を手であおいでかぐ。" },
-      { grade: 'ch1', unit: '化学', q: "液体を熱するとき、液体に沸騰石を入れておくのはなぜか。", a: "急に沸騰することをふせぐため(突沸することをふせぐため)。" },
+      { grade: 'ch1', unit: '化学', q: "液体を熱するとき、液体に沸騰石に入れておくのはなぜか。", a: "急に沸騰することをふせぐため(突沸することをふせぐため)。" },
       { grade: 'ch1', unit: '化学', q: "アンモニアは、上方置換法で集めるのはなぜか。「水」「密度」という語句を用いて書きなさい。", a: "アンモニアは、水にとけやすく、空気よりも密度が小さいから。" },
       { grade: 'ch1', unit: '化学', q: "水上置換法で集めるとき、はじめに出てくる気体は集めずに、しばらくしてから集める。その理由を簡単に答えなさい。", a: "はじめに出てきた気体には、実験装置の中の空気が混ざっているから。" },
       { grade: 'ch1', unit: '化学', q: "80℃の塩化ナトリウムの飽和水溶液を20℃に冷やしても、ほとんど結晶が出てこない。その理由を「溶解度」という語句を用いて書きなさい。", a: "塩化ナトリウムは、温度が変わっても溶解度がほとんど変わらないため。" },
-
-      // 中1 物理
       { grade: 'ch1', unit: '物理', q: "打ち上げ花火では、花火が開くときの光が見えたあとにその音が聞こえるのはなぜか。", a: "音の伝わる速さが光の速さに比べておそいから。" },
       { grade: 'ch1', unit: '物理', q: "水面から深くなればなるほど水圧はどうなるか。", a: "大きくなる" },
-
-      // 中1 地学
       { grade: 'ch1', unit: '地学', q: "深成岩と火山岩それぞれについて、マグマがどのように冷えてできるか。マグマの冷える場所と冷え方についてふれて書きなさい。", a: "(深成岩) マグマが地下の深いところでゆっくりと冷えて固まってできる。(火山岩) マグマが地表や地表付近で急に冷えて固まってできる。" },
       { grade: 'ch1', unit: '地学', q: "震度とマグニチュードの違いを簡単に書きなさい。", a: "震度は観測地点でのゆれの大きさを表し、マグニチュードは地震の規模を表す。" },
       { grade: 'ch1', unit: '地学', q: "泥岩、砂岩、れき岩をつくっている粒が丸みを帯びているのはなぜか。", a: "水の流れによって運ばれる間に、角がけずられたため。" },
       { grade: 'ch1', unit: '地学', q: "示準化石となる生物にはどのような特徴があるか。「範囲」「期間」という語句を用いて書きなさい。", a: "生活していた範囲が広く、生存していた期間が短い。" },
-
-      // 中2 生物
       { grade: 'ch2', unit: '生物', q: "小腸の内側に柔毛が無数にあることは、どのような点で役に立っているか。「表面積」という語句を用いて書きなさい。", a: "小腸の表面積が大きくなり、栄養分を効率よく吸収できる点。" },
       { grade: 'ch2', unit: '生物', q: "赤血球に含まれるヘモグロビンが肺で酸素と結合し、からだの組織で酸素をはなすのは、ヘモグロビンにどのような性質があるためか。", a: "酸素が多いところでは、酸素と結合し酸素の少ないところでは、酸素をはなす性質。" },
       { grade: 'ch2', unit: '生物', q: "静脈のところどころにある弁にはどのようなはたらきがあるか。", a: "血液の逆流を防ぐはたらき。" },
@@ -423,42 +564,28 @@
       { grade: 'ch2', unit: '生物', q: "カエルの子と成体は、それぞれどのように呼吸をするか。", a: "子のときはえらで呼吸をするが、成体のときは肺と皮膚で呼吸をする。" },
       { grade: 'ch2', unit: '生物', q: "ホニュウ類や鳥類は恒温動物である。恒温動物には、どのような特徴があるか。「体温」という語句を用いて書きなさい。", a: "外界の温度が変化しても体温を保つことができる。" },
       { grade: 'ch2', unit: '生物', q: "昆虫類などの節足動物は、からだの表面やあしにどのような特徴があるか。", a: "からだが外骨格でおおわれ、あしに節がある。" },
-
-      // 中2 化学
       { grade: 'ch2', unit: '化学', q: "単体とはどんな物質か、簡潔に書きなさい。", a: "1種類の原子からできている物質。" },
       { grade: 'ch2', unit: '化学', q: "試験管内で炭酸水素ナトリウムを加熱するとき、試験管の口を底よりも下げて加熱するのはなぜか。", a: "できた水(液体)が加熱部分に流れると、試験管が割れることがあるから。" },
       { grade: 'ch2', unit: '化学', q: "水の電気分解では、水酸化ナトリウムをとかした水を用いるのはなぜか。", a: "水に電流を流しやすくするため。" },
       { grade: 'ch2', unit: '化学', q: "鉄粉と硫黄の粉末の混合物を加熱するとき、混合物が赤くなりはじめたら加熱をやめる。その理由を書きなさい。", a: "鉄と硫黄の化合では熱が発生し、その熱によって反応が進むから。" },
       { grade: 'ch2', unit: '化学', q: "化学変化の前後で、物質全体の質量が変わらないのはなぜか。「原子」という語句を用いて書きなさい。", a: "化学変化の前後で物質全体の原子の種類と数が変わらないから。" },
-
-      // 中2 物理
       { grade: 'ch2', unit: '物理', q: "電磁誘導という現象を簡潔に説明しなさい。", a: "コイルのまわりの磁界が変化すると、コイルに電圧が生じ電流が流れる現象" },
-
-      // 中2 地学
       { grade: 'ch2', unit: '地学', q: "寒冷前線が通過するとき、風向と気温はどうなるか。", a: "風向が北寄りに変わり、気温が急に下がる。" },
       { grade: 'ch2', unit: '地学', q: "寒冷前線付近では、にわか雨があることが多いのはなぜか。その理由を「暖気」「寒気」という語句を用いて、雲ができる過程にふれて書きなさい。", a: "寒冷前線付近では、寒気が暖気の下にもぐりこんで急な上昇気流を生じ、積乱雲が発達するから。" },
       { grade: 'ch2', unit: '地学', q: "晴れた日の昼、海岸付近では、海から陸に向かう風がふくのはなぜか。「気流」「気圧」という語句を用いて書きなさい。", a: "陸上で上昇気流が生じ、陸上の気圧が海上よりも低くなるため。" },
       { grade: 'ch2', unit: '地学', q: "春と秋、日本付近の天気が数日おきに変化するのはなぜか。", a: "偏西風によって、移動性高気圧と低気圧が交互に日本付近を通過するから。" },
       { grade: 'ch2', unit: '地学', q: "冬の季節風は、ユーラシア大陸では乾燥しているが、日本海側に大雪を降らせる。その理由を「水蒸気」という語句を用いて書きなさい。", a: "季節風で移動してきた空気が日本海上を通過する間に、多量の水蒸気を含むため。" },
-
-      // 中3 生物
       { grade: 'ch3', unit: '生物', q: "タマネギの根の先端を顕微鏡で観察する前に、切りとった根をうすい塩酸につける。この処理を行うのはなぜか。", a: "ひとつひとつの細胞をはなれやすくするため。" },
       { grade: 'ch3', unit: '生物', q: "タマネギの根は、細胞のどのような変化によって成長するか。", a: "先端付近で細胞の数がふえ、ふえた細胞の大きさが大きくなって成長する。" },
       { grade: 'ch3', unit: '生物', q: "動物の胚は、いつからいつまでの間をいうか。", a: "受精卵が細胞分裂をはじめてから自分で食物をとり始めるまでの間。" },
       { grade: 'ch3', unit: '生物', q: "親のからだの一部から子ができる無性生殖では、子には親と同じ形質が現れる。その理由を「染色体」「遺伝子」という語句を用いて書きなさい。", a: "子は親から同じ染色体を受けつぐので、同じ遺伝子をもつため。" },
       { grade: 'ch3', unit: '生物', q: "生態系において、草食動物の数量が急激にふえると、肉食動物と植物の数量は一時的にどうなるか。", a: "肉食動物の数量はふえ、植物の数量は減る。" },
       { grade: 'ch3', unit: '生物', q: "森で採集した土を2つに分け、そのままの土をペットボトルAに入れ、十分に焼いた土をペットボトルBに入れた。次に、それぞれのペットボトルにデンプンのりを加えて放置した。3日後、それぞれから上澄み液をとり、ヨウ素液を加えたところ、ペットボトルAでは変化が見られなかった。(A)ペットボトルBに入れた土を十分に焼いたのはなぜか。(B)ペットボトルAの上澄み液では、ヨウ素液の変化が見られなかったのはなぜか。", a: "(A) 土の中の菌類や細菌類などを死滅させるため。(B) 菌類や細菌類などがデンプンを分解したから。" },
-
-      // 中3 化学
       { grade: 'ch3', unit: '化学', q: "うすい塩酸を電気分解装置に入れて電流を流すと、発生する水素と塩素の体積は同じはずなのに、集まる体積は塩素のほうが少ない。これは塩素にどのような性質があるためか。", a: "塩素が水にとけやすいため。" },
       { grade: 'ch3', unit: '化学', q: "ビーカーに水溶液を入れ、2枚の板を入れて電池をつくった。このとき、水溶液と板をどのようなものを用いるとよいか。", a: "電解質の水溶液に2種類の金属板を入れる。" },
       { grade: 'ch3', unit: '化学', q: "BTB溶液を加えた水酸化ナトリウム水溶液に塩酸を加えていくと、水溶液の色が緑色になった。水溶液の色が緑色になった理由を、水溶液中のイオンに着目して答えなさい。", a: "水酸化物イオンと水素イオンが互いの性質を打ち消し合い、水溶液が中性になるため。" },
-
-      // 中3 物理
       { grade: 'ch3', unit: '物理', q: "台車が斜面をのぼる運動をするとき、しだいに速さがおそくなる。その理由を書きなさい。", a: "台車の運動の向きと逆向きに力がはたらくから。" },
       { grade: 'ch3', unit: '物理', q: "LED電球が白熱電球より優れている点を、エネルギーの移り変わりについて簡単に答えなさい。", a: "白熱電球よりも、エネルギーの変換効率が高い点。" },
-
-      // 中3 地学
       { grade: 'ch3', unit: '地学', q: "透明半球上に太陽の位置を記録するとき、サインペンの先の影がどのようになるように印をつけるか。", a: "サインペンの先の影が円の中心にくるように、透明半球上に印をつける。" },
       { grade: 'ch3', unit: '地学', q: "太陽が東の地平線からのぼり、南の空を通って、西の地平線に沈むのはなぜか。「東」「西」「南」「北」から2つの語句を用いて書きなさい。", a: "地球が西から東に自転しているから。" },
       { grade: 'ch3', unit: '地学', q: "北極星は1晩中観測しても、その位置のまま動かない。その理由を「地軸」という語句を用いて書きなさい。", a: "北極星は、地軸を延長した付近にあるから。" },
@@ -530,13 +657,111 @@
       container.innerHTML = filtered.map((item, idx) => createQuestionCard(item, idx)).join('');
     }
 
+    // 実験器具のポイント解説データ
+    const labPointDetails = {
+      microscope: {
+        title: "顕微鏡の使い方とポイント",
+        img: "img/jikken1.webp",
+        html: `
+          <h4>⚙️ 操作手順</h4>
+          <ul>
+            <li><strong>対物レンズを低倍率にする:</strong> 視野が広いため、観察したいものを探しやすくなります。</li>
+            <li><strong>明るさの調節:</strong> 接眼レンズを覗きながら反射鏡を調節し、全体が明るく見えるようにします。</li>
+            <li><strong>プレパラートのセット:</strong> 見たいものがレンズの真下にくるようにのせてクリップで固定。</li>
+            <li><strong>調節ねじの操作:</strong> <span class="highlight">真横から見ながら</span>プレパラートと対物レンズをできるだけ近づけます。（ぶつかって破損するのを防ぐため）</li>
+            <li><strong>ピント合わせ:</strong> 接眼レンズを覗き、調節ねじを少しずつ回して<span class="highlight">遠ざけながら</span>ピントを合わせます。</li>
+            <li>しぼりを回して、観察したいものがはっきり見えるように最終調節します。</li>
+          </ul>
+          <h4>🔬 プレパラートの作り方と像の見え方</h4>
+          <ul>
+            <li>観察物をスライドガラスにのせ、スポイトで水滴をたらす。</li>
+            <li><span class="highlight">空気のあわが入らないように</span>カバーガラスをかける。（はみ出た水はろ紙で吸い取る）</li>
+            <li><strong>像の見え方（上下左右が逆）:</strong> プレパラートは<span class="highlight">「見えている生物がある方向」と同じ向きに動かす</span>と中央に移動します。<br>（例：視野の「左下」に生物が見えるとき ➔ プレパラートを「左下」へ動かす）</li>
+            <li><strong>倍率:</strong> 接眼レンズの倍率 × 対物レンズの倍率</li>
+          </ul>
+        `
+      },
+      cylinder: {
+        title: "メスシリンダーの使い方とポイント",
+        img: "img/jikken2.webp",
+        html: `
+          <h4>📏 出題ポイント</h4>
+          <ul>
+            <li><strong>器具の名称:</strong> イラストを見て器具名を答える問題。</li>
+            <li><strong>置く場所:</strong> <span class="highlight">水平な台の上に置く</span>ことを記述させる問題が出ます。</li>
+            <li><strong>目の位置:</strong> 液面を<span class="highlight">真横から</span>見ます。</li>
+            <li><strong>読み取る位置:</strong> 液面の<span class="highlight">へこんだ部分（一番低いところ）</span>を読み取ります。</li>
+            <li><strong>目盛りの読み方:</strong> 最小目盛り（1cm³）の<span class="highlight">10分の1（0.1cm³の位）まで目分量で読む</span>。</li>
+            <li>※例: 52cm³ではなく、0.1の位まで読んだことが分かるように<span class="highlight">「52.0cm³」</span>と書きます。</li>
+          </ul>
+        `
+      },
+      burner: {
+        title: "ガスバーナーの使い方とポイント",
+        img: "img/jikken3.webp",
+        html: `
+          <h4>🔥 ねじの位置と回す方向</h4>
+          <ul>
+            <li><strong>ガス調整ねじ:</strong> ガスの元栓に近い<span class="highlight">下側</span>のねじ。</li>
+            <li><strong>空気調整ねじ:</strong> <span class="highlight">上側</span>のねじ。</li>
+            <li>ねじを開く方向は、ペットボトルの蓋を開けるのと同じ方向。</li>
+          </ul>
+          <h4>点火の手順</h4>
+          <ul>
+            <li>① 両方のねじが締まっているか確認 → ② 元栓を開く → ③ コックを開く。</li>
+            <li>④ マッチに火をつけ、バーナー口に下から近づけたまま、<span class="highlight">ガス調整ねじを緩めて点火</span>。</li>
+            <li>⑤ ガス調整ねじで<span class="highlight">炎の大きさ</span>を調節（最初は空気が不足し赤・黄色の炎）。</li>
+            <li>⑥ 空気調整ねじで空気を入れ、<span class="highlight">青色の三角形の炎</span>に調節。</li>
+          </ul>
+        `
+      },
+      balance: {
+        title: "上皿天秤の使い方とポイント",
+        img: "img/jikken4.webp",
+        html: `
+          <h4>⚖️ 基本的な使い方</h4>
+          <ul>
+            <li>水平な台の上に置き、皿をのせる。</li>
+            <li>うでを静かに振らせ、<span class="highlight">針の振れが左右で等しくなるよう調節ねじを回す</span>。（ぴったり止まらなくても左右の振れが等しければ釣り合っています）</li>
+            <li><strong>分銅の扱い:</strong> 手で触れず、必ず<span class="highlight">ピンセット</span>で扱う。</li>
+            <li><strong>片付け:</strong> 皿を一方に重ねて保管する。</li>
+          </ul>
+          <h4>質量の測り方（右利きの場合）</h4>
+          <ul>
+            <li><strong>物体の質量をはかる時:</strong> 左に物体、<span class="highlight">右に分銅</span>。</li>
+            <li><strong>一定量の薬品をはかり取る時:</strong> 左に分銅、<span class="highlight">右に薬品</span>。</li>
+            <li><strong>分銅ののせ方:</strong> 少し重いと思う分銅から順にのせ、重すぎたら次に軽い分銅に変えていく。（<span class="highlight">重い分銅から順に</span>試す）</li>
+          </ul>
+        `
+      }
+    };
+
+    // モーダルを開く
+    function openModal(key) {
+      const data = labPointDetails[key];
+      if (!data) return;
+
+      document.getElementById('modalImg').src = data.img;
+      document.getElementById('modalTitle').textContent = data.title;
+      document.getElementById('modalPoints').innerHTML = data.html;
+
+      document.getElementById('imageModal').classList.add('show');
+    }
+
+    // モーダルを閉じる
+    function closeModal(e) {
+      document.getElementById('imageModal').classList.remove('show');
+    }
+
+    function closeModalDirect() {
+      document.getElementById('imageModal').classList.remove('show');
+    }
+
     // 初期化表示
     window.onload = function() {
-      // 実験器具問題描画（20問）
       document.getElementById('lab-questions-container').innerHTML = 
         labData.map((item, idx) => createQuestionCard(item, idx)).join('');
 
-      // 記述問題描画（全問題初期化）
       filterGrade('all', null);
     };
   </script>

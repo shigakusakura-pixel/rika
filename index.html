@@ -1308,13 +1308,16 @@ function resetYot() {
 function renderTabBar() {
   const tabs = [
     { id:'chu1', label:'🌱 中1' },
-    { id:'chu2', label:'⚗️ 中2' },
+    { id:'chu2', label:'🔬 中2' },
     { id:'chu3', label:'⚡ 中3' },
+    { id:'theme', label:'🎯 テーマ別', url:'theme.html' }, // 👈 追加
     { id:'yoten', label:'📋 要点チェック' }
   ];
-  document.getElementById('tabBar').innerHTML = tabs.map(t =>
-    `<button class="tab-btn${currentTab===t.id?' active':''}" onclick="switchTab('${t.id}')">${t.label}</button>`
-  ).join('');
+  document.getElementById('tabBar').innerHTML = tabs.map(t => {
+    // テーマ別タブの場合はページ遷移、それ以外は既存のswitchTabを呼ぶ
+    const clickAction = t.url ? `location.href='${t.url}'` : `switchTab('${t.id}')`;
+    return `<button class="tab-btn${currentTab===t.id?' active':''}" onclick="${clickAction}">${t.label}</button>`;
+  }).join('');
 }
 
 function switchTab(tab) {

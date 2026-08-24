@@ -1527,7 +1527,7 @@ function fillBlank(uid, qi) {
     renderWordBank();
     return;
   }
-  if (!selectedWord) {
+ if (!selectedWord) {
     document.querySelectorAll('.blank').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
     return;
@@ -1543,6 +1543,9 @@ function fillBlank(uid, qi) {
   highlightNext();
 }
 
+// ===== 理科 タイマー計測処理 =====
+let rikaStartTime = Date.now();
+
 function checkAnswers() {
   const u = getUnit();
   let correct = 0;
@@ -1550,10 +1553,14 @@ function checkAnswers() {
   scores[u.id] = { correct, total: u.qs.length };
   checked[u.id] = true;
 
-  // 🌟 新規追加：Firebaseへ記録を送信（一問一答用） 🌟
+  // 所要時間（秒）を計算
+  const durationSec = Math.floor((Date.now() - rikaStartTime) / 1000);
+
+  // 🌟 Firebaseへ記録を送信（所要時間を追加） 🌟
   if (window.sendResultToFirebase) {
     const subjectName = currentTab === 'chu1' ? '中学理科 中1' : currentTab === 'chu2' ? '中学理科 中2' : '中学理科 中3';
-    window.sendResultToFirebase(subjectName, u.title, correct, u.qs.length);
+    window.sendResultToFirebase(subjectName, u.title, correct, u.qs.length, durationSec);
+    rikaStartTime = Date.now(); // 送信後にタイマーリセット
   }
 
   renderAll();
@@ -1565,12 +1572,13 @@ function resetUnit() {
   delete checked[u.id];
   delete scores[u.id];
   selectedWord = null;
+  rikaStartTime = Date.now(); // やり直し時もタイマーリセット
   renderAll();
 }
 
 init();
 </script>
 
-<script type="module" src="./mystudy.js"></script>
+<script type="module" src="./mystudy.js?v=2"></script>
 </body>
 </html>

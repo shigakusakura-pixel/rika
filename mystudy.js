@@ -1,4 +1,4 @@
-// syakai / mystudy.js
+// rika / mystudy.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -14,17 +14,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ① 未ログイン（ゲスト）遮断
-const urlParams = new URLSearchParams(window.location.search);
-const studentId = urlParams.get('student');
-const PORTAL_URL = "https://shigakusakura-pixel.github.io/mystudyroom/";
-
-if (!studentId || studentId === 'ゲスト' || studentId === 'guest' || studentId.trim() === '') {
-  alert("ログイン（生徒IDの確認）が必要です。ポータルへ戻ります。");
-  window.location.replace(PORTAL_URL);
+// ① 生徒IDの安全な取得
+function getStudentId() {
+  const urlParams = new URLSearchParams(window.location.search);
+  let id = urlParams.get('student') || urlParams.get('id') || urlParams.get('studentId');
+  if (!id && window.location.hash.includes('student=')) {
+    const hashParams = new URLSearchParams(window.location.hash.substring(window.location.hash.indexOf('?')));
+    id = hashParams.get('student');
+  }
+  if (!id) {
+    id = localStorage.getItem('shigaku_student_id') || localStorage.getItem('mystudy_student_id');
+  }
+  return id ? id.trim() : "";
 }
 
-// 画面ロック表示関数
+let rawStudentId = getStudentId() || "guest";
+const studentId = (rawStudentId && !rawStudentId.includes('@') && rawStudentId !== 'guest') 
+  ? `${rawStudentId}@shigaku.local` 
+  : rawStudentId;
+
+// 画面ロック表示
 function showLock() {
   const lock = document.createElement("div");
   lock.id = "lock-screen";
@@ -37,21 +46,25 @@ function showLock() {
   return lock;
 }
 
-// ② 社会用：採点・要点チェック完了時の送信関数
-window.sendResultToFirebase = async function(subjectName, unitName, correct, total) {
+// ② 理科用 送信関数（正解数・問題数・所要秒数を保存）
+window.sendResultToFirebase = async function(passedSubjectName, unitName, correct, total, duration = 0) {
   const lock = showLock();
   try {
+    const subjectName = "中学理科";
     await addDoc(collection(db, "learning_records"), {
       studentId: studentId,
-      subject: subjectName || "中学社会",
+      subject: subjectName,
       unit: unitName,
       correct: correct,
       total: total,
+      duration: duration, // 秒数を記録
       action: "単元完了",
       timestamp: serverTimestamp()
     });
     lock.remove();
-    alert(`【記録完了】${unitName}（${correct}/${total}問正解）を保存しました！`);
+    
+    const timeText = duration > 0 ? `（所要時間: ${Math.floor(duration / 60)}分${duration % 60}秒）` : '';
+    alert(`【記録完了】${unitName}（${correct}/${total}問正解）を保存しました！\n${timeText}`);
   } catch (e) {
     console.error("保存失敗:", e);
     lock.remove();
